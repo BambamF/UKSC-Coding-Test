@@ -5,9 +5,3 @@ __pycache__/
 .env
 .env.*
 venv/
-
-# Keep folder placeholders
-!data/clean/.gitkeep
-!data/messy/.gitkeep
-!results/.gitkeep
-!reports/.gitkeep

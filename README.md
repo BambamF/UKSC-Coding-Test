@@ -8,7 +8,7 @@ The code in main.py uses a matching/ranking qualifier to match company names to 
 
 ### 1. Clone the Repository
 
-This repository can be cloned and run in your local environment and output is written to data/matched_companies.csv, with progress logged to the terminal as each record completes. 
+This repository can be cloned and run in your local environment, output is written to data/matched_companies.csv with progress logged to the terminal as each record completes. 
 
 In order to do this, you will require an API key from Companies House, instructions on creating an application and acquiring an API key can be found here: [Companies House API](https://developer.company-information.service.gov.uk/authentication/)
 
@@ -78,8 +78,8 @@ python src/main.py
 For each input name, candidate UK entities are retrieved from Companies House's search endpoints, then scored against the normalised input using RapidFuzz (character-ratio, token-sort, and token-set similarity, taking the best of the three).
 
 High: the normalised input matches a candidate's normalised name exactly, with no other candidate also matching exactly.
-Low: ambiguous: the best candidate scores well but ties with (or scores within a small margin of) another equally plausible candidate.
+Low - ambiguous: the best candidate scores well but ties with (or scores within a small margin of) another equally plausible candidate.
 None: no candidate scored above the similarity floor.
 Error: the lookup failed (API error); the original record is still preserved.
 
-This intentionally favours declaring a match ambiguous over guessing, per the brief's instruction not to force a match where evidence is insufficient.
+This favours declaring a match ambiguous over guessing, avoiding forcing a match where evidence is insufficient.
