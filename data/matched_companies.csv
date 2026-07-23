@@ -1,10 +1,10 @@
 original_supplied_name,matched_company_name,company_number,company_status,incorporation_date,registered_office_address,SIC_codes,previous_company_names,match_confidence,notes
-A-GAS (UK),,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-AVL,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-Arm Limited,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-Gas Sensing,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-ACER LIMITED,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-Mediatek Inc,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-LS3 LIMITED,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-GSS,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
-Air Liquide Ltd,,,,,,,,none,0 candidates found but none scored >= 50 confidence score
+Gas Sensing,GAS SENSING SOLUTIONS LTD.,SC284351,,2005-05-05,"Suite 2, Ground Floor Orchard Brae House, 30 Queensferry Road, Edinburgh, EH4 2HS, United Kingdom",26511; 26512,WORLDWIDE TECHNOLOGY LTD. (until 2005-08-22),low - ambiguous,Top match 'GAS SENSING SOLUTIONS LTD.' scored 100 but runner-up 'GAS ANALYSIS AND SENSING GROUP LIMITED' scored 100 - too close to call automatically.
+Air Liquide Ltd,AIR LIQUIDE LIMITED,02103630,,1987-02-25,"Station Road, Coleshill, Birmingham, West Midlands, B46 1JY",21100,LINDE GAS UK LIMITED (until 2007-06-05); FORK LIFT SPARES LIMITED (until 1990-06-07),high,
+ACER LIMITED,ACER SECURITIES LIMITED,NI623142,,2014-02-28,"256c Kings Road, Belfast, County Antrim, BT5 7GL, Northern Ireland",,,low - ambiguous,Top match 'ACER SECURITIES LIMITED' scored 100 but runner-up 'ACER DWELLINGS LTD' scored 100 - too close to call automatically.
+AVL,AVL DITEST UK LTD,12390508,,2020-01-07,"20-22 Wenlock Road, London, N1 7GU, England",62012,,low - ambiguous,Top match 'AVL DITEST UK LTD' scored 100 but runner-up 'AVL LONDON LTD' scored 100 - too close to call automatically.
+A-GAS (UK),A-GAS (UK) LIMITED,02752249,,1992-10-01,"Banyard Road, Portbury, Bristol, BS20 7XH",39000; 46120,A-GAS LIMITED (until 2000-03-10); OVAL (825) LIMITED (until 1992-11-09),high,
+Mediatek Inc,MEDIATEK LTD,12021192,,2019-05-29,"20-22 Wenlock Road, London, N1 7GU, England",46520; 63120,,high,
+GSS,GSS GATWICK LIMITED,12961192,,2020-10-19,"Ecen Suite 43, Michael Way, Warth Park, Northampton, NN9 6GR, United Kingdom",68209,,low - ambiguous,Top match 'GSS GATWICK LIMITED' scored 100 but runner-up 'GSS VENTURES LTD' scored 100 - too close to call automatically.
+LS3 LIMITED,LS3 LIMITED,06687817,,2008-09-03,"7 Delmore Road, Frome, Somerset, BA11 4EG",7487,,low - ambiguous,Top match 'LS3 LIMITED' scored 100 but runner-up 'LS3 LTD' scored 100 - too close to call automatically.
+Arm Limited,LAZY ARM LIMITED,12923752,,2020-10-02,"90 Paul Street, London, EC2A 4NE, England",56302,,low - ambiguous,Top match 'LAZY ARM LIMITED' scored 100 but runner-up 'ARM PLASTERING SOLUTIONS LTD' scored 100 - too close to call automatically.

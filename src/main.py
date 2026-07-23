@@ -43,9 +43,7 @@ session = requests.Session()
 
 rate_limiter = RateLimiter(REQUEST_N_LIMIT, REQUEST_TIME_LIMIT)
 
-legal_suffixes = ["limited", "ltd", "plc", "llp", "llc", "inc", "incorporated",
-    "corp", "corporation", "company", "co", "group", "holdings",
-    "(uk)", "uk"] # Claude Suggestion
+legal_suffixes = ["limited", "ltd", "plc", "llp", "llc", "inc", "incorporated", "corp", "corporation"] # Claude Suggestion
 
 company_names = ["ACER LIMITED", "A-GAS (UK)", "Air Liquide Ltd", "Arm Limited", "AVL", "Gas Sensing", "GSS", "LS3 LIMITED", "Mediatek Inc"]
 
@@ -79,6 +77,8 @@ def get_row(url: str, params: Optional[Dict[str, Any]] = None, timeout: int = 30
         return response.json()
     raise RuntimeError("Retry limit exceeded for Url: {url} | Params: {params}")
 
+def get_candidate_name(candidate: Dict) -> str:
+    return candidate.get("title") or candidate.get("company_name") or ""
 
 def normalise_name(name: str) -> str:
     name = name.lower().replace("&", " and ").replace("-", " ").replace("(", " ").replace(")", " ")
@@ -91,13 +91,13 @@ def search_candidates(name: str) -> List[Dict[str, Any]]:
     items = (data or {}).get("items", [])
 
     if not items:
-        data = get_row(SEARCH_FALLBACK_URL, params={"q": query, "items_per_page": 20})
+        data = get_row(SEARCH_FALLBACK_URL, params={"q": name, "items_per_page": 20})
         items = (data or {}).get("items", [])
 
     return items
 
 def score_candidate(query: str, candidate: Dict) -> Dict[str, Any]:
-    normalised_title = normalise_name(candidate.get("title", ""))
+    normalised_title = normalise_name(get_candidate_name(candidate))
     ratio = fuzz.ratio(query, normalised_title)
     token_sort_ratio = fuzz.token_sort_ratio(query, normalised_title)
     token_set_ratio = fuzz.token_set_ratio(query, normalised_title)
@@ -112,6 +112,11 @@ def score_candidate(query: str, candidate: Dict) -> Dict[str, Any]:
 def rank_candidates(company_name: str, candidates: List[Dict]) -> List[Dict[str, Any]]:
     query = normalise_name(company_name)
     scored_candidates = [score_candidate(query, c) for c in candidates]
+
+    """ print(f"  query='{query}'")
+    for s in sorted(scored_candidates, key=lambda x: x["score"], reverse=True)[:5]:
+        print(f"    {s['score']:.0f}  {s['candidate'].get('title')}") """
+    
     scored_candidates = [s for s in scored_candidates if s['score'] >= LOW_CONFIDENCE]
     return scored_candidates
 
@@ -121,7 +126,13 @@ def fetch_profile(company_number: str) -> Optional[Dict]:
 def format_address(address: Dict[str, str]) -> str:
     if not address:
         return ""
-    return address['address_snippet']
+    parts = [
+        address.get("premises"), address.get("address_line_1"),
+        address.get("address_line_2"), address.get("locality"),
+        address.get("region"), address.get("postal_code"),
+        address.get("country"),
+    ]
+    return ", ".join(p for p in parts if p)
 
 def format_previous_names(profile: Dict) -> str:
     prev_names = profile.get( "previous_company_names", []) or []
@@ -151,19 +162,33 @@ def build_row(company_name: str) -> Dict[str, Any]:
         ranked_candidates = rank_candidates(company_name, candidates)
         if not ranked_candidates:
             base_row["match_confidence"] = "none"
-            base_row["notes"] = f"{len(ranked_candidates)} candidates found but none scored >= {LOW_CONFIDENCE} confidence score"
+            base_row["notes"] = (
+                f"{len(candidates)} candidates returned by search but none scored "
+                f">= {LOW_CONFIDENCE}."
+            )
             return base_row
 
-        top = ranked_candidates[0]
-        runner_up = ranked_candidates[1] if len(ranked_candidates) > 1 else None
-        top_title = top["candidate"].get("title", "")
-        top_score = top["score"]
+        query_norm = normalise_name(company_name)
+        exact_matches = [
+            c for c in ranked_candidates
+            if normalise_name(get_candidate_name(c["candidate"])) == query_norm
+        ]
 
-        ambiguous = (
-            runner_up is not None
-            and (top_score - runner_up["score"]) < GAP
-            and runner_up["score"] >= LOW_CONFIDENCE
-        ) # Claude suggestion
+        if exact_matches:
+            top = exact_matches[0]
+            runner_up = exact_matches[1] if len(exact_matches) > 1 else None
+            ambiguous = len(exact_matches) > 1
+        else:
+            top = ranked_candidates[0]
+            runner_up = ranked_candidates[1] if len(ranked_candidates) > 1 else None
+            ambiguous = (
+                runner_up is not None
+                and (top["score"] - runner_up["score"]) < GAP
+                and runner_up["score"] >= LOW_CONFIDENCE
+            )
+
+        top_title = get_candidate_name(top["candidate"])
+        top_score = top["score"] # Claude suggestion
 
         company_number = top["candidate"].get("company_number", "")
         company_profile = fetch_profile(company_number) if company_number else None
@@ -171,12 +196,12 @@ def build_row(company_name: str) -> Dict[str, Any]:
         if company_profile:
             base_row["matched_company_name"] = company_profile.get("company_name", top_title)
             base_row["company_number"] = company_number
-            base_row["company_status"] = company_profile.get("company_status", "")
+            base_row["company_status"] = company_profile.get("status", "")
             base_row["incorporation_date"] = company_profile.get("date_of_creation", "")
             base_row["registered_office_address"] = format_address(
                 company_profile.get("registered_office_address", {})
             )
-            base_row["SIC_code"] = format_sic_codes(company_profile)
+            base_row["SIC_codes"] = format_sic_codes(company_profile)
             base_row["previous_company_names"] = format_previous_names(company_profile)
 
         else:
@@ -184,7 +209,7 @@ def build_row(company_name: str) -> Dict[str, Any]:
             # profile fetch failed but we still have search result level info
             base_row["matched_company_name"] = top_title
             base_row["company_number"] = company_number
-            base_row["company_status"] = top["candidate"].get("company_status", "")
+            base_row["company_status"] = top["candidate"].get("status", "")
             base_row["notes"] += " Profile fetch failed, showing search-result data only."
 
         notes = []
@@ -192,7 +217,7 @@ def build_row(company_name: str) -> Dict[str, Any]:
             confidence = "low - ambiguous"
             notes.append(
                 f"Top match '{top_title}' scored {top_score:.0f} but runner-up "
-                f"'{runner_up['candidate'].get('title', '')}' scored "
+                f"'{get_candidate_name(runner_up["candidate"])}' scored "
                 f"{runner_up['score']:.0f} - too close to call automatically."
             )
         elif top_score >= HIGH_CONFIDENCE:
@@ -203,7 +228,7 @@ def build_row(company_name: str) -> Dict[str, Any]:
             confidence = "low"
             notes.append(f"Best candidate only scored {top_score:.0f}/100 similarity.")
  
-        if company_profile and company_profile.get("company_status") == "dissolved":
+        if company_profile and company_profile.get("status") == "dissolved":
             notes.append("Matched company is dissolved.")
  
         base_row["match_confidence"] = confidence
@@ -232,6 +257,8 @@ def main():
     if os.path.isfile(CSV_PATH):
         os.remove(CSV_PATH)
 
+    print()
+
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(build_row, name): name for name in company_names}
         for future in as_completed(futures):
@@ -241,6 +268,7 @@ def main():
             print(f"[{row['match_confidence']}] {name} -> {row['matched_company_name'] or '(no match)'}")
  
     print(f"\nDone. Records written to {CSV_PATH}")
+    print()
 
     df = pd.read_csv(CSV_PATH)
     print(df.head(10))
