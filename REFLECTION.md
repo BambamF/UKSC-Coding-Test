@@ -4,6 +4,8 @@ In this project, I learnt quickly that the API documentation is succinct but als
 
 I also enjoyed getting some more practice with threading.Session objects, ThreadPoolExecutors and a custom rate limiter which I learnt to make in my recent big data analytics module. The rate limiter was fun to make because I essentially had to think both about concurrency using the mutex, and also hacking together a custom blocking deque, a collection I use in Java from the standard library but got to roll from scratch again in python. That was also a nice feeling.
 
+
+
 ## AI Usage
 
 I used Claude from time to time to suggest better approaches than I had formulated to achieve a couple goals.
@@ -27,3 +29,4 @@ Other bug fixes like: SIC_code/SIC_codes field mismatch, a legal_suffixes over-s
 ### Lookahead
 
 Given more time, I would love to work out a better method for calculating confidence, in this attempt I was not able to find a better method for getting high confidence matched for companies that I know exist such as Arm Limited, I stagnated at a low to ambiguous confidence rating and a top candidate match of Lazy Arm Limited, even purging the titles of their suffixes didnt improve the matches past the point at which they sit, that is upsetting but given more time to I believe I can figure it out.
+I also was not able to get to a method for including a likely operating location from a reliable source, this was disappointing.

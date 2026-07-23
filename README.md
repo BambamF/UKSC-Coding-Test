@@ -16,7 +16,9 @@ In order to do this, you will require an API key from Companies House, instructi
 
 Once acquired, you can create a file named ".env" in the project root directory, and store the API key using UKSC_KEY as the key and the API key as the value e.g.: UKSC_KEY=myapi-key-myapi-key
 
-Then you can set the environment variable by following this system agnostic tutorial: [Set Env](https://configu.com/blog/setting-env-variables-in-windows-linux-macos-beginners-guide/)
+then run:
+
+export UKSC_KEY=your-key-here
 
 Once you have your API key from Companies House, you will then be ready to run the program.
 
@@ -71,13 +73,13 @@ Once the dependencies have been installed, you can run the code and see the outp
 
 python src/main.py
 
-# Match confidence methodology
+## Match confidence methodology
 
 For each input name, candidate UK entities are retrieved from Companies House's search endpoints, then scored against the normalised input using RapidFuzz (character-ratio, token-sort, and token-set similarity, taking the best of the three).
 
 High: the normalised input matches a candidate's normalised name exactly, with no other candidate also matching exactly.
-Low – ambiguous: the best candidate scores well but ties with (or scores within a small margin of) another equally plausible candidate.
-None — no candidate scored above the similarity floor.
-Error — the lookup failed (API error); the original record is still preserved.
+Low: ambiguous: the best candidate scores well but ties with (or scores within a small margin of) another equally plausible candidate.
+None: no candidate scored above the similarity floor.
+Error: the lookup failed (API error); the original record is still preserved.
 
 This intentionally favours declaring a match ambiguous over guessing, per the brief's instruction not to force a match where evidence is insufficient.
