@@ -112,11 +112,6 @@ def score_candidate(query: str, candidate: Dict) -> Dict[str, Any]:
 def rank_candidates(company_name: str, candidates: List[Dict]) -> List[Dict[str, Any]]:
     query = normalise_name(company_name)
     scored_candidates = [score_candidate(query, c) for c in candidates]
-
-    """ print(f"  query='{query}'")
-    for s in sorted(scored_candidates, key=lambda x: x["score"], reverse=True)[:5]:
-        print(f"    {s['score']:.0f}  {s['candidate'].get('title')}") """
-    
     scored_candidates = [s for s in scored_candidates if s['score'] >= LOW_CONFIDENCE]
     return scored_candidates
 
